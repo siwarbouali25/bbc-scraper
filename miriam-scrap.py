@@ -14,7 +14,7 @@ FEEDS = {
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
 TIMEOUT        = 20
-OUTPUT_CSV     = "bbc_articles_simple.csv"
+OUTPUT_CSV     = "bbc_articles_simple_miriam.csv"
 
 HEADERS = {
     "User-Agent": "bbc-hourly-scraper/1.0 (+contact@example.com)",
