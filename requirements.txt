@@ -1,0 +1,7 @@
+requests
+beautifulsoup4
+lxml
+readability-lxml
+feedparser
+pandas
+python-dateutil
