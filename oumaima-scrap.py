@@ -8,8 +8,22 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-    "Sport":    "https://feeds.bbci.co.uk/sport/rss.xml",
-    "World":    "https://feeds.bbci.co.uk/news/world/rss.xml",
+"Sport": [
+    "https://feeds.bbci.co.uk/sport/rss.xml",
+    "https://www.espn.com/espn/rss/news",
+    "https://www.skysports.com/rss/12040",
+    "https://www.eurosport.com/rss.xml"
+],
+"World": [
+    "https://feeds.bbci.co.uk/news/world/rss.xml",              # BBC World
+    "https://rss.cnn.com/rss/edition_world.rss",               # CNN World
+    "https://feeds.reuters.com/Reuters/worldNews",             # Reuters World News
+    "https://www.aljazeera.com/xml/rss/all.xml",               # Al Jazeera (global)
+    "https://www.npr.org/rss/rss.php?id=1004",                 # NPR World
+    "https://www.theguardian.com/world/rss",                   # The Guardian World
+    "https://www.nytimes.com/services/xml/rss/nyt/World.xml"   # New York Times World
+],
+
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
