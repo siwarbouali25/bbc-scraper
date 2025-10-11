@@ -8,22 +8,9 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-    "Sport": [
-        "https://feeds.bbci.co.uk/sport/rss.xml",
-        "https://www.espn.com/espn/rss/news",
-        "https://www.skysports.com/rss/12040",
-        "https://www.eurosport.com/rss.xml"
-    ],
-    "World": [
-        "https://feeds.bbci.co.uk/news/world/rss.xml",
-        "https://rss.cnn.com/rss/edition_world.rss",
-        "https://feeds.reuters.com/Reuters/worldNews",
-        "https://www.aljazeera.com/xml/rss/all.xml"
-    ],
-    # You can still keep single-URL categories:
-    # "Business": "https://feeds.bbci.co.uk/news/business/rss.xml",
+    "Sport":    "https://feeds.bbci.co.uk/sport/rss.xml",
+    "World":    "https://feeds.bbci.co.uk/news/world/rss.xml",
 }
-
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
 TIMEOUT        = 20
@@ -236,40 +223,31 @@ def main():
 
     new_rows = []
 
-    for category, feed_urls in FEEDS.items():
-        # accept both string and list for backward compatibility
-        urls = [feed_urls] if isinstance(feed_urls, str) else list(feed_urls)
-
-        for feed_url in urls:
-            print(f"[feed] {category} → {feed_url}")
-            try:
-                feed = feedparser.parse(feed_url)
-            except Exception as ex:
-                print("[skip feed]", feed_url, "->", ex)
+    for category, feed_url in FEEDS.items():
+        print(f"[feed] {category} → {feed_url}")
+        feed = feedparser.parse(feed_url)
+        for e in feed.entries[:MAX_PER_FEED]:
+            link = e.get("link")
+            if not link:
                 continue
-
-            entries = getattr(feed, "entries", []) or []
-            for e in entries[:MAX_PER_FEED]:
-                link = e.get("link")
-                if not link:
+            # Normalize RSS link early to reduce duplicates before fetch
+            link = normalize_url(link)
+            try:
+                row = parse_article(link, category)
+                if not row:
                     continue
-                link = normalize_url(link)
-                try:
-                    row = parse_article(link, category)
-                    if not row:
-                        continue
-                    if (row["id_article"] in seen_ids) or (row["id_article"] in seen_run_ids):
-                        continue
-                    if (row["content_hash"] in seen_content) or (row["content_hash"] in seen_run_content):
-                        continue
+                if (row["id_article"] in seen_ids) or (row["id_article"] in seen_run_ids):
+                    continue
+                if (row["content_hash"] in seen_content) or (row["content_hash"] in seen_run_content):
+                    continue
 
-                    new_rows.append(row)
-                    seen_run_ids.add(row["id_article"])
-                    seen_run_content.add(row["content_hash"])
-                    print(f"✓ {row['title'][:80]}…")
-                    time.sleep(PAUSE_SECONDS)
-                except Exception as ex:
-                    print("[skip]", link, "->", ex)
+                new_rows.append(row)
+                seen_run_ids.add(row["id_article"])
+                seen_run_content.add(row["content_hash"])
+                print(f"✓ {row['title'][:80]}…")
+                time.sleep(PAUSE_SECONDS)
+            except Exception as ex:
+                print("[skip]", link, "->", ex)
 
     if new_rows:
         pd.DataFrame(new_rows).to_csv(
@@ -278,3 +256,7 @@ def main():
         print(f"💾 Appended {len(new_rows)} new rows to {OUTPUT_CSV}")
     else:
         print("No new rows.")
+
+if __name__ == "__main__":
+    pd.set_option("display.width", 160)
+    main()
