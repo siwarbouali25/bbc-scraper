@@ -7,12 +7,25 @@ from dateutil import parser as dtparse
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
+# You can use strings OR lists for each category.
 FEEDS = {
-      "politics":      "https://feeds.bbci.co.uk/news/politics/rss.xml",
-    "entertainment": "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+    "politics": [
+        "https://feeds.bbci.co.uk/news/politics/rss.xml",
+        "https://www.theguardian.com/politics/rss",
+        "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
+        "https://rss.cnn.com/rss/edition_world.rss",
+    ],
+    "entertainment": [
+        "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+        "https://rss.cnn.com/rss/edition_entertainment.rss",
+        "https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml",
+    ],
+    # Single URL still works fine:
+    # "business": "https://feeds.bbci.co.uk/news/business/rss.xml",
 }
-MAX_PER_FEED   = 60          # safety cap per feed per run
-PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
+
+MAX_PER_FEED   = 60           # safety cap per feed per run
+PAUSE_SECONDS  = 1.2          # politeness delay between article fetches
 TIMEOUT        = 20
 OUTPUT_CSV     = "bbc_articles_simple_miriam.csv"
 
@@ -25,6 +38,20 @@ HEADERS = {
 STRIP_QUERY_PARAMS = {
     "utm_source","utm_medium","utm_campaign","utm_term","utm_content",
     "at_medium","at_campaign","at_custom1","ns_mchannel","ns_source","ns_campaign"
+}
+
+# Optional: map domains to friendly source names
+DOMAIN_SOURCE_MAP = {
+    "bbc.co.uk": "BBC", "bbc.com": "BBC",
+    "cnn.com": "CNN",
+    "reuters.com": "Reuters",
+    "aljazeera.com": "Al Jazeera",
+    "npr.org": "NPR",
+    "theguardian.com": "The Guardian",
+    "nytimes.com": "NYTimes",
+    "espn.com": "ESPN",
+    "skysports.com": "Sky Sports",
+    "eurosport.com": "Eurosport",
 }
 
 # ===================== UTILS =====================
@@ -47,6 +74,38 @@ def fetch(url, timeout=TIMEOUT):
     r.raise_for_status()
     return r
 
+def load_feed(feed_url: str):
+    """Fetch RSS/Atom with headers, then parse with feedparser (more reliable for some sites)."""
+    try:
+        resp = requests.get(feed_url, headers=HEADERS, timeout=TIMEOUT)
+        resp.raise_for_status()
+        return feedparser.parse(resp.content)
+    except Exception as ex:
+        print("[skip feed]", feed_url, "->", ex)
+        return None
+
+def entry_link(e):
+    """Robustly extract an article URL from a feed entry."""
+    # feedparser returns FeedParserDict (mapping-like)
+    if isinstance(e, dict):
+        if e.get("link"):
+            return e.get("link")
+        links = e.get("links") or []
+        if links and isinstance(links, list) and isinstance(links[0], dict):
+            href = links[0].get("href")
+            if href:
+                return href
+        return e.get("id") or None
+    try:
+        if getattr(e, "link", None):
+            return e.link
+        links = getattr(e, "links", [])
+        if links and isinstance(links, list) and isinstance(links[0], dict) and links[0].get("href"):
+            return links[0]["href"]
+        return getattr(e, "id", None)
+    except Exception:
+        return None
+
 def clean_join(paras):
     """Join <p> nodes into paragraphs; skip empties and obvious non-body items."""
     out = []
@@ -66,10 +125,25 @@ def clean_join(paras):
             acl = " ".join(anc.get("class", [])).lower() if hasattr(anc, "get") else ""
             if any(x in acl for x in ["promo","related","share","advert","cookie"]):
                 bad = True; break
-        if bad: 
+        if bad:
             continue
         out.append(txt)
     return "\n\n".join(out).strip()
+
+def infer_source(u: str) -> str:
+    """Infer human-friendly source name from URL domain."""
+    try:
+        host = urlparse(u).netloc.lower()
+        for prefix in ("www.", "edition.", "amp."):
+            if host.startswith(prefix):
+                host = host[len(prefix):]
+        for dom, name in DOMAIN_SOURCE_MAP.items():
+            if host.endswith(dom):
+                return name
+        # fallback: host without port
+        return host.split(":")[0]
+    except Exception:
+        return "Unknown"
 
 # ===================== EXTRACTION =====================
 def parse_article(url, category):
@@ -91,7 +165,7 @@ def parse_article(url, category):
     h1 = soup.select_one("h1")
     title = h1.get_text(strip=True) if h1 else (soup.find("meta", property="og:title") or {}).get("content") or ""
 
-    # Author (BBC often omits)
+    # Author (often omitted)
     author_meta = soup.find("meta", attrs={"name": "byl"}) or soup.find("meta", attrs={"name": "author"})
     author = author_meta.get("content") if author_meta else None
 
@@ -118,7 +192,7 @@ def parse_article(url, category):
     except Exception:
         published_date = None
 
-    # ----- Body extraction: Readability → BBC selectors → JSON-LD → AMP -----
+    # ----- Body extraction: Readability → site selectors → JSON-LD → AMP -----
     content_text = ""
     # 1) Readability
     try:
@@ -127,7 +201,7 @@ def parse_article(url, category):
     except Exception:
         content_text = ""
 
-    # 2) BBC selectors
+    # 2) Generic selectors (works for many sites including BBC)
     if len(content_text) < 800:
         paras = (soup.select('[data-component="text-block"] p') or
                  soup.select("article p") or
@@ -180,6 +254,9 @@ def parse_article(url, category):
     # Content hash catches same story under different URLs
     content_hash = hashlib.sha1((title + "|" + content_text[:4000]).encode("utf-8", "ignore")).hexdigest()
 
+    # Infer source dynamically
+    source_name = infer_source(canonical or norm_url)
+
     return {
         "id_article": id_article,
         "title": title,
@@ -187,7 +264,7 @@ def parse_article(url, category):
         "content": content_text.strip(),
         "url": canonical or norm_url,   # store canonical when available
         "category": category,
-        "source": "BBC",
+        "source": source_name,
         "author": author,
         "image": image,
         "published_date": published_date,
@@ -206,57 +283,4 @@ def load_existing_keys(path):
         return set(), set()
     try:
         df = pd.read_csv(path, usecols=["id_article","content_hash"])
-        return set(df["id_article"].astype(str)), set(df["content_hash"].astype(str))
-    except Exception:
-        # fallback if older file lacks content_hash
-        try:
-            df = pd.read_csv(path, usecols=["id_article"])
-            return set(df["id_article"].astype(str)), set()
-        except Exception:
-            return set(), set()
-
-# ===================== MAIN =====================
-def main():
-    ensure_csv(OUTPUT_CSV)
-    seen_ids, seen_content = load_existing_keys(OUTPUT_CSV)
-    seen_run_ids, seen_run_content = set(), set()
-
-    new_rows = []
-
-    for category, feed_url in FEEDS.items():
-        print(f"[feed] {category} → {feed_url}")
-        feed = feedparser.parse(feed_url)
-        for e in feed.entries[:MAX_PER_FEED]:
-            link = e.get("link")
-            if not link:
-                continue
-            # Normalize RSS link early to reduce duplicates before fetch
-            link = normalize_url(link)
-            try:
-                row = parse_article(link, category)
-                if not row:
-                    continue
-                if (row["id_article"] in seen_ids) or (row["id_article"] in seen_run_ids):
-                    continue
-                if (row["content_hash"] in seen_content) or (row["content_hash"] in seen_run_content):
-                    continue
-
-                new_rows.append(row)
-                seen_run_ids.add(row["id_article"])
-                seen_run_content.add(row["content_hash"])
-                print(f"✓ {row['title'][:80]}…")
-                time.sleep(PAUSE_SECONDS)
-            except Exception as ex:
-                print("[skip]", link, "->", ex)
-
-    if new_rows:
-        pd.DataFrame(new_rows).to_csv(
-            OUTPUT_CSV, mode="a", header=False, index=False, quoting=csv.QUOTE_MINIMAL
-        )
-        print(f"💾 Appended {len(new_rows)} new rows to {OUTPUT_CSV}")
-    else:
-        print("No new rows.")
-
-if __name__ == "__main__":
-    pd.set_option("display.width", 160)
-    main()
+        return set(df["id_article"].astyp_]()
