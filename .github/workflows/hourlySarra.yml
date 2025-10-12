@@ -1,4 +1,4 @@
-name: Hourly BBC Scrape
+name: Hourly sarra scrap
 
 on:
   schedule:
