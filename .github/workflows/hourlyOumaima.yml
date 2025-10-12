@@ -1,4 +1,4 @@
-name: Hourly BBC Scrape oumaima
+name: Hourly oumaima scrape
 
 on:
   schedule:
@@ -31,4 +31,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: hourly scrape update"
-          file_pattern: bbc_articles_simple_oumaima.csv
+          file_pattern: articles_simple_oumaima.csv
