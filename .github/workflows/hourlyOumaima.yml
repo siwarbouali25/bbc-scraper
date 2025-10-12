@@ -1,4 +1,4 @@
-name: Hourly BBC Scrape oumaima
+name: Hourly Scrape oumaima
 
 on:
   schedule:
