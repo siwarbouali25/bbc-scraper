@@ -59,7 +59,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: hourly scrape update"
-          file_pattern: bbc_articles_simple_miriam.csv   # <-- exact filename!
+          file_pattern: articles_simple_miriam.csv   # <-- exact filename!
           branch: miriam-scrap
           # If you still hit rare races, you can add:
           # push_options: --force-with-lease
