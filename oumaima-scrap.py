@@ -23,7 +23,7 @@ MAX_PER_FEED  = 60
 PAUSE_SECONDS = 1.2
 
 TIMEOUT        = 20
-OUTPUT_CSV     = "bbc_articles_simple_oumaima.csv"
+OUTPUT_CSV     = "articles_simple_oumaima.csv"
 
 HEADERS = {
     "User-Agent": "reuters-hourly-scraper/1.0 (+contact@example.com)",
