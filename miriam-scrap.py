@@ -8,13 +8,15 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-      "politics":      "https://feeds.bbci.co.uk/news/politics/rss.xml",
-    "entertainment": "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+      "politics": "https://www.theguardian.com/politics/rss",
+    "World": "https://www.theguardian.com/world/rss",
+    "Business": "https://www.theguardian.com/uk/business/rss"
+   
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
 TIMEOUT        = 20
-OUTPUT_CSV     = "bbc_articles_simple.csv"
+OUTPUT_CSV     = "bbc_articles_simple_miriam.csv"
 
 HEADERS = {
     "User-Agent": "bbc-hourly-scraper/1.0 (+contact@example.com)",
