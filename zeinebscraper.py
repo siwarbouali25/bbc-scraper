@@ -8,15 +8,14 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-     "Politics": "https://feeds.bbci.co.uk/news/politics/rss.xml",
-    "World (International)": "https://feeds.bbci.co.uk/news/world/rss.xml",
-    "Science": "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
-    "Health": "https://feeds.bbci.co.uk/news/health/rss.xml",
-    "Sports": "https://feeds.bbci.co.uk/sport/rss.xml?edition=uk",
-    "Entertainment": "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
-    "Culture": "https://www.bbc.com/culture/feed.rss",
-    "Society": "https://feeds.bbci.co.uk/news/uk/rss.xml",   # good proxy for general society topics
-   
+      "Politics": "https://www.pbs.org/newshour/feeds/rss/politics",  
+  "World (International)": "https://www.globalnews.ca/pages/feeds/world.rss",  
+  "Science": "https://phys.org/rss-feed/physorg/science-news.xml",  
+  "Health": "https://www.globalnews.ca/pages/feeds/health.rss",  
+  "Sports": "https://www.cbsnews.com/rss/sports.xml",  
+  "Entertainment": "https://www.cbsnews.com/rss/entertainment.xml",  
+  "Culture": "https://www.lemonde.fr/en/rss/en_culture.xml",  
+  "Society": "https://www.lemonde.fr/en/rss/en_society.xml"
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
