@@ -1,4 +1,4 @@
-name: Hourly BBC Scrape miriam
+name: Hourly Scrape ibtihel
 
 on:
   schedule:
@@ -25,10 +25,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run scraper
-        run: python miriam-scrap.py
+        run: python ibtihel_scrapFile.py
 
       - name: Commit & push CSV
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: hourly scrape update"
-          file_pattern: bbc_articles_simple_miriam.csv
+          file_pattern: articles_simple_ibtihel.csv
