@@ -282,6 +282,14 @@ def load_existing_keys(path):
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         return set(), set()
     try:
-        df = pd.read_csv(path, usecols=["id_article","content_hash"])
-        return set(df["id_article"].astype(str))
+        df = pd.read_csv(path, usecols=["id_article", "content_hash"])
+        return set(df["id_article"].astype(str)), set(df["content_hash"].astype(str))
+    except Exception:
+        # fallback if older file lacks 'content_hash' column
+        try:
+            df = pd.read_csv(path, usecols=["id_article"])
+            return set(df["id_article"].astype(str)), set()
+        except Exception:
+            return set(), set()
+
 
