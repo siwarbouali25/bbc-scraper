@@ -1,4 +1,4 @@
-name: Hourly Scrape oums
+name: Hourly Scrape Oumaima
 
 on:
   schedule:
@@ -8,27 +8,63 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: scrape-oumaima-scrap
+  cancel-in-progress: false
+
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Checkout repo avec l’historique complet
       - name: Check out repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
+      # 2️⃣ Assurer la branche oumaima-scrap
+      - name: Ensure branch oumaima-scrap exists and checkout
+        shell: bash
+        run: |
+          git fetch origin
+          if git ls-remote --exit-code --heads origin oumaima-scrap >/dev/null 2>&1; then
+            git checkout oumaima-scrap
+            git pull --rebase origin oumaima-scrap
+          else
+            git checkout -B oumaima-scrap origin/main
+            git push -u origin oumaima-scrap
+          fi
+          git branch --show-current
+
+      # 3️⃣ Setup Python 3.11
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Install deps
+      # 4️⃣ Installer les dépendances
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
+      # 5️⃣ Exécuter le scraper
       - name: Run scraper
         run: python oumaima-scrap.py
 
+      # 6️⃣ Rebase sur la branche distante pour éviter non-fast-forward
+      - name: Rebase on latest remote
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin oumaima-scrap
+          git rebase origin/oumaima-scrap || (git rebase --abort && git merge --no-edit origin/oumaima-scrap)
+
+      # 7️⃣ Commit & push du CSV
       - name: Commit & push CSV
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: hourly scrape update"
           file_pattern: articles_simple_oumaima.csv
+          branch: oumaima-scrap
+          push_options: --force-with-lease
