@@ -8,7 +8,7 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-      "politics":      "https://www.theguardian.com/politics/rss",
+      "politics": "https://www.theguardian.com/politics/rss",
     "entertainment": "https://rss.cnn.com/rss/edition_entertainment.rss",
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
