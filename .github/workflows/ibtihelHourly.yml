@@ -1,0 +1,34 @@
+name: Hourly BBC Scrape miriam
+
+on:
+  schedule:
+    - cron: "5 * * * *"   # runs every hour at :05 UTC
+  workflow_dispatch:      # allow manual runs
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run scraper
+        run: python miriam-scrap.py
+
+      - name: Commit & push CSV
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: hourly scrape update"
+          file_pattern: bbc_articles_simple_miriam.csv
