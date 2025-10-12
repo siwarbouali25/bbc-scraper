@@ -1,19 +1,40 @@
-name: Hourly Scrape oumaima
+name: Hourly Reuters Scrape Oumaima
 
 on:
   schedule:
     - cron: "5 * * * *"   # runs every hour at :05 UTC
-  workflow_dispatch:      # allow manual runs
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: scrape-oumaima-scrap
+  cancel-in-progress: false
 
 jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repo
+      - name: Check out repo (full history)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Ensure branch oumaima-scrap exists and checkout
+        shell: bash
+        run: |
+          git fetch origin
+          if git ls-remote --exit-code --heads origin oumaima-scrap >/dev/null 2>&1; then
+            git checkout oumaima-scrap
+            git pull --rebase origin oumaima-scrap
+          else
+            # create branch from main the first time
+            git checkout -B oumaima-scrap origin/main
+            git push -u origin oumaima-scrap
+          fi
+          git branch --show-current
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,10 +46,19 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run scraper
-        run: python oumaima-scrap.py
+        run: python oumaima-scrap.py   # <-- script Reuters adapté
 
-      - name: Commit & push CSV
+      - name: Rebase on latest remote (avoid non-fast-forward)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin oumaima-scrap
+          git rebase origin/oumaima-scrap || (git rebase --abort && git merge --no-edit origin/oumaima-scrap)
+
+      - name: Commit & push CSV to oumaima-scrap
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: hourly scrape update"
-          file_pattern: bbc_articles_simple_oumaima.csv
+          file_pattern: articles_simple_oumaima.csv   # <-- fichier CSV Reuters
+          branch: oumaima-scrap
+          # push_options: --force-with-lease
