@@ -8,11 +8,18 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-    "technology": "https://feeds.bbci.co.uk/news/technology/rss.xml",
-    "business": "https://feeds.bbci.co.uk/news/business/rss.xml",
+    "Politics": "https://feeds.bbci.co.uk/news/politics/rss.xml",
+    "World (International)": "https://feeds.bbci.co.uk/news/world/rss.xml",
+    "Science": "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+    "Health": "https://feeds.bbci.co.uk/news/health/rss.xml",
+    "Sports": "https://feeds.bbci.co.uk/sport/rss.xml?edition=uk",
+    "Entertainment": "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+    "Culture": "https://www.bbc.com/culture/feed.rss",
+    "Society": "https://feeds.bbci.co.uk/news/uk/rss.xml",   # good proxy for general society topics
 }
-MAX_PER_FEED   = 60          # safety cap per feed per run
-PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
+MAX_PER_FEED  = 60
+PAUSE_SECONDS = 1.2
+
 TIMEOUT        = 20
 OUTPUT_CSV     = "bbc_articles_simple.csv"
 
