@@ -10,7 +10,14 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 FEEDS = {
       "politics": "https://www.theguardian.com/politics/rss",
     "World": "https://www.theguardian.com/world/rss",
-    "Business": "https://www.theguardian.com/uk/business/rss"
+    "Business": "https://www.theguardian.com/uk/business/rss",
+      "Technology": "https://www.theguardian.com/uk/technology/rss",
+    "Science": "https://www.theguardian.com/science/rss",
+    "Health": "https://www.theguardian.com/society/health/rss",
+    "Sport": "https://www.theguardian.com/uk/sport/rss",
+    "Entertainment":"https://www.rollingstone.com/culture/feed/",
+    "Culture": "https://www.theguardian.com/culture/rss",
+    "Society": "https://www.theguardian.com/society/rss"
    
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
