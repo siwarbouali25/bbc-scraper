@@ -14,16 +14,7 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ================= CONFIG =================
 FEEDS = {
-    "Politics": "https://www.reutersagency.com/feed/?best-topics=politics",
-    "World": "https://www.reutersagency.com/feed/?best-topics=world",
-    "Business": "https://www.reutersagency.com/feed/?best-topics=business-finance",
-    "Technology": "https://www.reutersagency.com/feed/?best-topics=technology",
-    "Science": "https://www.reutersagency.com/feed/?best-topics=science",
-    "Health": "https://www.reutersagency.com/feed/?best-topics=health",
-    "Sports": "https://www.reutersagency.com/feed/?best-topics=sports",
-    "Entertainment": "https://www.reutersagency.com/feed/?best-topics=entertainment",
-    "Culture": "https://www.reutersagency.com/feed/?best-topics=culture",
-    "Society": "https://www.reutersagency.com/feed/?best-topics=society",
+    "Politics": "https://www.theguardian.com/politics/rss",
 }
 
 MAX_PER_FEED  = 50
