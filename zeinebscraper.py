@@ -8,27 +8,27 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-    "Politics": "https://www.pbs.org/newshour/feeds/rss/politics",  
-    "World (International)": "https://globalnews.ca/pages/feeds/world.rss",  
-    "Science": "https://phys.org/rss-feed/physorg/science-news.xml",  
-    "Health": "https://globalnews.ca/pages/feeds/health.rss",  
-    "Sports": "https://www.cbsnews.com/rss/sports.xml",  
-    "Entertainment": "https://www.cbsnews.com/rss/entertainment.xml",  
-    "Culture": "https://www.lemonde.fr/en/rss/en_culture.xml",  
-    "Society": "https://www.lemonde.fr/en/rss/en_society.xml"
+     "Politics": "https://feeds.bbci.co.uk/news/politics/rss.xml",
+    "World (International)": "https://feeds.bbci.co.uk/news/world/rss.xml",
+    "Science": "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
+    "Health": "https://feeds.bbci.co.uk/news/health/rss.xml",
+    "Sports": "https://feeds.bbci.co.uk/sport/rss.xml?edition=uk",
+    "Entertainment": "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+    "Culture": "https://www.bbc.com/culture/feed.rss",
+    "Society": "https://feeds.bbci.co.uk/news/uk/rss.xml",   # good proxy for general society topics
+   
 }
-
-MAX_PER_FEED  = 5          # start small for testing
-PAUSE_SECONDS = 2.0        # polite delay between article fetches
-TIMEOUT       = 20
-OUTPUT_CSV    = "articles_multi_source.csv"
+MAX_PER_FEED   = 60          # safety cap per feed per run
+PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
+TIMEOUT        = 20
+OUTPUT_CSV     = "articles_simple_zeineb.csv.csv"
 
 HEADERS = {
-    "User-Agent": "multi-hourly-scraper/1.0 (+contact@example.com)",
+    "User-Agent": "bbc-hourly-scraper/1.0 (+contact@example.com)",
     "Accept-Language": "en;q=0.9, fr;q=0.8"
 }
 
-# Query params to strip when normalizing URLs
+# Tracking params to strip when normalizing URLs
 STRIP_QUERY_PARAMS = {
     "utm_source","utm_medium","utm_campaign","utm_term","utm_content",
     "at_medium","at_campaign","at_custom1","ns_mchannel","ns_source","ns_campaign"
@@ -98,7 +98,7 @@ def parse_article(url, category):
     h1 = soup.select_one("h1")
     title = h1.get_text(strip=True) if h1 else (soup.find("meta", property="og:title") or {}).get("content") or ""
 
-    # Author
+    # Author (BBC often omits)
     author_meta = soup.find("meta", attrs={"name": "byl"}) or soup.find("meta", attrs={"name": "author"})
     author = author_meta.get("content") if author_meta else None
 
@@ -125,7 +125,7 @@ def parse_article(url, category):
     except Exception:
         published_date = None
 
-    # ----- Body extraction -----
+    # ----- Body extraction: Readability → BBC selectors → JSON-LD → AMP -----
     content_text = ""
     # 1) Readability
     try:
@@ -134,9 +134,12 @@ def parse_article(url, category):
     except Exception:
         content_text = ""
 
-    # 2) Generic selectors
+    # 2) BBC selectors
     if len(content_text) < 800:
-        paras = (soup.select("article p") or soup.select("main p") or soup.select("p"))
+        paras = (soup.select('[data-component="text-block"] p') or
+                 soup.select("article p") or
+                 soup.select("main p") or
+                 soup.select('[class*="RichTextComponentWrapper"] p'))
         if paras:
             txt = clean_join(paras)
             if len(txt) > len(content_text):
@@ -176,9 +179,12 @@ def parse_article(url, category):
     if len(content_text.strip()) < 200:
         return None
 
-    # ----- De-duplication keys -----
+    # ----- De-dup keys -----
+    # Prefer canonical URL; fallback to normalized request URL
     id_source = canonical or norm_url
     id_article = hashlib.sha1(id_source.encode()).hexdigest()[:12]
+
+    # Content hash catches same story under different URLs
     content_hash = hashlib.sha1((title + "|" + content_text[:4000]).encode("utf-8", "ignore")).hexdigest()
 
     return {
@@ -186,16 +192,16 @@ def parse_article(url, category):
         "title": title,
         "tags": tags,
         "content": content_text.strip(),
-        "url": canonical or norm_url,
+        "url": canonical or norm_url,   # store canonical when available
         "category": category,
-        "source": urlparse(url).netloc,   # auto-detect source
+        "source": "BBC",
         "author": author,
         "image": image,
         "published_date": published_date,
-        "content_hash": content_hash,
+        "content_hash": content_hash,   # kept to de-dup across runs
     }
 
-# ===================== STORAGE =====================
+# ===================== DEDUPE STORAGE =====================
 def ensure_csv(path):
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         pd.DataFrame(columns=[
@@ -209,6 +215,7 @@ def load_existing_keys(path):
         df = pd.read_csv(path, usecols=["id_article","content_hash"])
         return set(df["id_article"].astype(str)), set(df["content_hash"].astype(str))
     except Exception:
+        # fallback if older file lacks content_hash
         try:
             df = pd.read_csv(path, usecols=["id_article"])
             return set(df["id_article"].astype(str)), set()
@@ -230,6 +237,7 @@ def main():
             link = e.get("link")
             if not link:
                 continue
+            # Normalize RSS link early to reduce duplicates before fetch
             link = normalize_url(link)
             try:
                 row = parse_article(link, category)
