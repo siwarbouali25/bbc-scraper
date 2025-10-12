@@ -9,12 +9,12 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-      "politics": "https://edition.cnn.com/services/rss/",
-    "World": "https://edition.cnn.com/services/rss/",
-    "Business": "https://edition.cnn.com/business",
-    "Technology": "https://edition.cnn.com/business/tech",
+      "politics": "https://www.theguardian.com/politics/rss",
+    "World": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+    "Business": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+    "Technology": "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
     "Science": "https://edition.cnn.com/services/rss/",
-    "Health": "https://edition.cnn.com/health",
+    "Health": "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml",
     "Sport": "https://edition.cnn.com/sport",
     "Entertainment":"https://edition.cnn.com/services/rss/",
     "Culture": "https://edition.cnn.com/services/rss/",
