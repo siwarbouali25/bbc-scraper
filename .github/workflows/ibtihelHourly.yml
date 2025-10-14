@@ -1,34 +1,44 @@
-name: Hourly Scrape ibtihel
+name: Ibtihel Hourly Scraper
 
 on:
   schedule:
-    - cron: "55 * * * *"   # runs every hour at :05 UTC
-  workflow_dispatch:      # allow manual runs
-
-permissions:
-  contents: write
+    - cron: "55 * * * *"   # every hour
+  workflow_dispatch:
 
 jobs:
-  run:
+  scrape:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out repo
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # important: full history for pull/rebase
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-          cache: "pip"
+          python-version: "3.10"
 
-      - name: Install deps
-        run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt || true
+          pip install feedparser requests pandas beautifulsoup4 readability-lxml python-dateutil lxml
+
+      - name: Pull latest main (avoid divergence)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull origin main --rebase
 
       - name: Run scraper
         run: python ibtihel_scrapFile.py
 
-      - name: Commit & push CSV
+      - name: Commit and push new CSV
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: hourly scrape update"
           file_pattern: articles_simple_ibtihel.csv
+          commit_message: "chore: hourly scrape update"
+          commit_author: mnajjaa <117411818+mnajjaa@users.noreply.github.com>
+          # Optional safeguard if remote updates happen during runtime
+          push_options: '--force-with-lease'
