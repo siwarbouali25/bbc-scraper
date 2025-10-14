@@ -8,16 +8,16 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-      "Politics": "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
-    "World": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
-    "Business": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
-    "Technology": "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
-    "Science": "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml",
-    "Health": "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml",
-    "Sport": "https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml",
-    "Entertainment": "https://rss.nytimes.com/services/xml/rss/nyt/Movies.xml",
-    "Culture": "https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml",
-    "Society": "https://rss.nytimes.com/services/xml/rss/nyt/Style.xml"
+      "Politics": "https://www.reuters.com/rssFeed/politicsNews",
+    "World": "https://www.reuters.com/rssFeed/worldNews",
+    "Business": "https://www.reuters.com/rssFeed/businessNews",
+    "Technology": "https://www.reuters.com/rssFeed/technologyNews",
+    "Science": "https://www.reuters.com/rssFeed/scienceNews",
+    "Health": "https://www.reuters.com/rssFeed/healthNews",
+    "Sport": "https://www.reuters.com/rssFeed/sportsNews",
+    "Entertainment": "https://www.reuters.com/rssFeed/entertainmentNews",
+    "Culture": "https://www.reuters.com/rssFeed/lifestyle",
+    "Society": "https://www.reuters.com/rssFeed/environment"
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
