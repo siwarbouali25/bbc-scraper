@@ -8,16 +8,16 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-      "Politics": "https://feeds.npr.org/1014/rss.xml",
-    "World": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
-    "Business": "https://www.cnbc.com/id/10001147/device/rss",
-    "Technology": "https://www.wired.com/feed/rss",
-    "Science": "https://www.sciencemag.org/rss/news_current.xml",
-    "Health": "https://www.statnews.com/feed/",
-    "Sport": "https://www.espn.com/espn/rss/news",
-    "Entertainment": "https://www.rollingstone.com/culture/feed/",
-    "Culture": "https://www.npr.org/rss/rss.php?id=1008",
-    "Society": "https://www.npr.org/rss/rss.php?id=1128"
+      "Politics": "https://www.reuters.com/rssFeed/politicsNews",
+    "World": "https://www.reuters.com/rssFeed/worldNews",
+    "Business": "https://www.reuters.com/rssFeed/businessNews",
+    "Technology": "https://www.reuters.com/rssFeed/technologyNews",
+    "Science": "https://www.reuters.com/rssFeed/scienceNews",
+    "Health": "https://www.reuters.com/rssFeed/healthNews",
+    "Sport": "https://www.reuters.com/rssFeed/sportsNews",
+    "Entertainment": "https://www.reuters.com/rssFeed/entertainmentNews",
+    "Culture": "https://www.reuters.com/rssFeed/lifestyle",
+    "Society": "https://www.reuters.com/rssFeed/environment"
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
