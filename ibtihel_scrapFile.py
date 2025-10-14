@@ -8,16 +8,16 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-      "Politics": "https://www.reuters.com/rssFeed/politicsNews",
-    "World": "https://www.reuters.com/rssFeed/worldNews",
-    "Business": "https://www.reuters.com/rssFeed/businessNews",
-    "Technology": "https://www.reuters.com/rssFeed/technologyNews",
-    "Science": "https://www.reuters.com/rssFeed/scienceNews",
-    "Health": "https://www.reuters.com/rssFeed/healthNews",
-    "Sport": "https://www.reuters.com/rssFeed/sportsNews",
-    "Entertainment": "https://www.reuters.com/rssFeed/entertainmentNews",
-    "Culture": "https://www.reuters.com/rssFeed/lifestyle",
-    "Society": "https://www.reuters.com/rssFeed/environment"
+      "Politics": "https://feeds.washingtonpost.com/rss/politics",
+    "World": "https://feeds.washingtonpost.com/rss/world",
+    "Business": "https://feeds.washingtonpost.com/rss/business",
+    "Technology": "https://feeds.washingtonpost.com/rss/business/technology",
+    "Science": "https://feeds.washingtonpost.com/rss/national/science",
+    "Health": "https://feeds.washingtonpost.com/rss/health",
+    "Sport": "https://feeds.washingtonpost.com/rss/sports",
+    "Entertainment": "https://feeds.washingtonpost.com/rss/entertainment",
+    "Culture": "https://feeds.washingtonpost.com/rss/arts",
+    "Society": "https://feeds.washingtonpost.com/rss/lifestyle"
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
