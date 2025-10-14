@@ -188,18 +188,18 @@ def parse_article(url, category):
     # Content hash catches same story under different URLs
     content_hash = hashlib.sha1((title + "|" + content_text[:4000]).encode("utf-8", "ignore")).hexdigest()
 
-     return {
+    return {
         "id_article": id_article,
         "title": title,
         "tags": tags,
         "content": content_text.strip(),
         "url": canonical or norm_url,
         "category": category,
-        "source": "Washington Post",   # ✅ fixed source name
+        "source": "Washington Post",  # fixed label
         "author": author,
         "image": image,
         "published_date": published_date,
-        "content_hash": content_hash,
+        "content_hash": content_hash
     }
 
 # ===================== DEDUPE STORAGE =====================
