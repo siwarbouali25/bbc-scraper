@@ -196,7 +196,7 @@ def parse_article(url, category):
         "content": content_text.strip(),
         "url": canonical or norm_url,   # store canonical when available
         "category": category,
-        "source": "the guardian",
+        "source": "the guardians",
         "author": author,
         "image": image,
         "published_date": published_date,
