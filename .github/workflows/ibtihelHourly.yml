@@ -2,7 +2,7 @@ name: Hourly Scrape ibtihel
 
 on:
   schedule:
-    - cron: "5 * * * *"   # runs every hour at :05 UTC
+    - cron: "55 * * * *"   # runs every hour at :05 UTC
   workflow_dispatch:      # allow manual runs
 
 permissions:
