@@ -18,14 +18,9 @@ FEEDS = {
   "Entertainment": "https://variety.com/feed/",
   "Culture": "https://www.npr.org/rss/rss.php?id=1008",
   "Society": "https://theconversation.com/us/articles.atom",
-  "Opinion": "https://foreignpolicy.com/feed/",
-  "Analysis": "https://www.csmonitor.com/rss/top.rss",
   "Innovation": "https://www.arstechnica.com/feed/",
   "Environment": "https://www.aljazeera.com/xml/rss/themes/environment.xml",
-  "Education": "https://www.insidehighered.com/rss/news",
-  "US_News": "https://feeds.npr.org/1003/rss.xml",
-  "Top_Stories": "https://www.voanews.com/rss",
-  "Arts": "https://www.npr.org/rss/rss.php?id=1045"
+
 
 
 
