@@ -8,24 +8,14 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-  "world": "https://feeds.reuters.com/reuters/worldNews",
-  "politics": "https://feeds.reuters.com/Reuters/PoliticsNews",
-  "business": "https://feeds.reuters.com/reuters/businessNews",
-  "markets": "https://feeds.reuters.com/reuters/wealth",
-  "markets_us": "https://feeds.reuters.com/reuters/usMarkets",
-  "technology": "https://feeds.reuters.com/reuters/technologyNews",
-  "science": "https://feeds.reuters.com/reuters/scienceNews",
-  "health": "https://feeds.reuters.com/reuters/healthNews",
-  "environment": "https://feeds.reuters.com/reuters/environment",
-  "finance": "https://feeds.reuters.com/reuters/businessNews",
-  "sports": "https://feeds.reuters.com/reuters/sportsNews",
-  "entertainment": "https://feeds.reuters.com/reuters/entertainment",
-  "culture": "https://feeds.reuters.com/reuters/entertainment", 
-  "lifestyle": "https://feeds.reuters.com/reuters/lifestyle",
-  "oddities": "https://feeds.reuters.com/reuters/oddlyEnoughNews",
-  "breakingviews": "https://feeds.reuters.com/reuters/breakingviews",
-  "pictures": "https://feeds.reuters.com/reuters/pictures",
-  "videos": "https://www.reuters.com/tools/rss" 
+      "Politics": "https://www.pbs.org/newshour/feeds/rss/politics",  
+  "World (International)": "https://www.globalnews.ca/pages/feeds/world.rss",  
+  "Science": "https://phys.org/rss-feed/physorg/science-news.xml",  
+  "Health": "https://www.globalnews.ca/pages/feeds/health.rss",  
+  "Sports": "https://www.cbsnews.com/rss/sports.xml",  
+  "Entertainment": "https://www.cbsnews.com/rss/entertainment.xml",  
+  "Culture": "https://www.lemonde.fr/en/rss/en_culture.xml",  
+  "Society": "https://www.lemonde.fr/en/rss/en_society.xml"
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
