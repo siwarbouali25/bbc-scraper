@@ -8,16 +8,16 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-      "Politics": "https://feeds.washingtonpost.com/rss/politics",
-    "World": "https://feeds.washingtonpost.com/rss/world",
-    "Business": "https://feeds.washingtonpost.com/rss/business",
-    "Technology": "https://feeds.washingtonpost.com/rss/business/technology",
-    "Science": "https://feeds.washingtonpost.com/rss/national/science",
-    "Health": "https://feeds.washingtonpost.com/rss/health",
-    "Sport": "https://feeds.washingtonpost.com/rss/sports",
-    "Entertainment": "https://feeds.washingtonpost.com/rss/entertainment",
-    "Culture": "https://feeds.washingtonpost.com/rss/arts",
-    "Society": "https://feeds.washingtonpost.com/rss/lifestyle"
+    "Politics": "https://feeds.npr.org/1014/rss.xml",
+    "World": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+    "Business": "https://www.cnbc.com/id/10001147/device/rss",
+    "Technology": "https://www.wired.com/feed/rss",
+    "Science": "https://www.sciencemag.org/rss/news_current.xml",
+    "Health": "https://www.statnews.com/feed/",
+    "Sport": "https://www.espn.com/espn/rss/news",
+    "Entertainment": "https://www.rollingstone.com/culture/feed/",
+    "Culture": "https://www.npr.org/rss/rss.php?id=1008",
+    "Society": "https://www.npr.org/rss/rss.php?id=1128"
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
