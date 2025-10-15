@@ -9,24 +9,16 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 # ===================== CONFIG =====================
 FEEDS = {
 {
-  "Politics": "https://thehill.com/feed/",
-  "World": "https://www.aljazeera.com/xml/rss/all.xml",
-  "Business": "https://www.marketwatch.com/feeds/topstories",
-  "Technology": "https://www.wired.com/feed/rss",
-  "Science": "https://www.livescience.com/feeds/all",
-  "Health": "https://feeds.npr.org/1128/rss.xml",
-  "Sport": "https://www.cbssports.com/rss/headlines/",
-  "Entertainment": "https://variety.com/feed/",
-  "Culture": "https://www.npr.org/rss/rss.php?id=1008",
-  "Society": "https://theconversation.com/us/articles.atom",
-  "Opinion": "https://foreignpolicy.com/feed/",
-  "Analysis": "https://www.csmonitor.com/rss/top.rss",
-  "Innovation": "https://www.arstechnica.com/feed/",
-  "Environment": "https://www.aljazeera.com/xml/rss/themes/environment.xml",
-  "Education": "https://www.insidehighered.com/rss/news",
-  "US_News": "https://feeds.npr.org/1003/rss.xml",
-  "Top_Stories": "https://www.voanews.com/rss",
-  "Arts": "https://www.npr.org/rss/rss.php?id=1045"
+"Politics": "https://www.politico.com/rss/politics.xml",
+  "World": "https://www.huffpost.com/feeds/verticals/world/index.xml",
+  "Business": "https://hbr.org/feed",
+  "Technology": "https://techcrunch.com/feed/",
+  "Science": "https://www.sciencedaily.com/rss/top/science.xml",
+  "Health": "https://www.medicalnewstoday.com/rss",
+  "Sport": "https://www.espn.com/espn/rss/news",
+  "Entertainment": "https://www.rollingstone.com/culture/feed/",
+  "Culture": "https://www.theatlantic.com/feed/culture/",
+  "Society": "https://www.theatlantic.com/feed/society/"
 }
 
 }
