@@ -9,16 +9,16 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-      "politics": "https://edition.cnn.com/services/rss/",
-    "World": "https://edition.cnn.com/services/rss/",
-    "Business": "https://edition.cnn.com/business",
-    "Technology": "https://edition.cnn.com/business/tech",
-    "Science": "https://edition.cnn.com/services/rss/",
-    "Health": "https://edition.cnn.com/health",
-    "Sport": "https://edition.cnn.com/sport",
-    "Entertainment":"https://edition.cnn.com/services/rss/",
-    "Culture": "https://edition.cnn.com/services/rss/",
-    "Society": "https://edition.cnn.com/services/rss/"
+      "politics": "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml",
+    "World": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+    "Business": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml",
+    "Technology": "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
+    "Science": "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml",
+    "Health": "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml",
+    "Sport": "https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml",
+    "Entertainment":"https://rss.nytimes.com/services/xml/rss/nyt/Movies.xml",
+    "Culture": "https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml",
+    "Society": "https://rss.nytimes.com/services/xml/rss/nyt/Opinion.xml"
 }
 MAX_PER_FEED   = 60          # safety cap per feed per run
 PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
