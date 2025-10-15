@@ -201,7 +201,7 @@ def parse_article(url, category):
         "content": content_text.strip(),
         "url": canonical or norm_url,   # store canonical when available
         "category": category,
-        "source": "BBC",
+        "source": urlparse(canonical or norm_url).netloc.replace("www.", ""),
         "author": author,
         "image": image,
         "published_date": published_date,
