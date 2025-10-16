@@ -1,4 +1,3 @@
-# scraper.py
 import os, time, csv, hashlib, json
 import requests, feedparser, pandas as pd
 from bs4 import BeautifulSoup
@@ -9,27 +8,27 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 # ===================== CONFIG =====================
 FEEDS = {
     "Politics": "https://feeds.npr.org/1014/rss.xml",
-    "World": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+    "World": "https://www.reuters.com/rssFeed/worldNews",               
     "Business": "https://www.cnbc.com/id/10001147/device/rss",
-    "Technology": "https://www.wired.com/feed/rss",
+    "Technology": "https://www.engadget.com/rss.xml",                   
     "Science": "https://www.sciencemag.org/rss/news_current.xml",
     "Health": "https://www.statnews.com/feed/",
     "Sport": "https://www.espn.com/espn/rss/news",
     "Entertainment": "https://www.rollingstone.com/culture/feed/",
-    "Culture": "https://www.npr.org/rss/rss.php?id=1008",
+    "Culture": "https://www.france24.com/en/culture/rss",               
     "Society": "https://www.npr.org/rss/rss.php?id=1128"
 }
-MAX_PER_FEED   = 60          # safety cap per feed per run
-PAUSE_SECONDS  = 1.2         # politeness delay between article fetches
+
+MAX_PER_FEED   = 60
+PAUSE_SECONDS  = 1.2
 TIMEOUT        = 20
 OUTPUT_CSV     = "articles_simple_ibtihel.csv"
 
 HEADERS = {
-    "User-Agent": "bty-hourly-scraper/1.0 (+contact@example.com)",
+    "User-Agent": "ibtihel-hourly-scraper/1.0 (+contact@example.com)",
     "Accept-Language": "en;q=0.9, fr;q=0.8"
 }
 
-# Tracking params to strip when normalizing URLs
 STRIP_QUERY_PARAMS = {
     "utm_source","utm_medium","utm_campaign","utm_term","utm_content",
     "at_medium","at_campaign","at_custom1","ns_mchannel","ns_source","ns_campaign"
@@ -37,7 +36,6 @@ STRIP_QUERY_PARAMS = {
 
 # ===================== UTILS =====================
 def normalize_url(u: str) -> str:
-    """Normalize URL: lowercase host, strip fragment & tracking params, trim trailing slash."""
     p = urlparse(u)
     q = {k: v for k, v in parse_qsl(p.query, keep_blank_values=True)
          if k not in STRIP_QUERY_PARAMS}
@@ -55,18 +53,24 @@ def fetch(url, timeout=TIMEOUT):
     r.raise_for_status()
     return r
 
+def extract_source_name(url: str) -> str:
+    """Extract a readable source name from the URL domain."""
+    domain = urlparse(url).netloc.lower()
+    domain = domain.replace("www.", "")
+    parts = domain.split(".")
+    if len(parts) > 2:
+        domain = ".".join(parts[-2:])
+    return domain.split(".")[0].capitalize()
+
 def clean_join(paras):
-    """Join <p> nodes into paragraphs; skip empties and obvious non-body items."""
     out = []
     for p in paras:
         txt = p.get_text(" ", strip=True)
         if not txt or len(txt) < 3:
             continue
-        # Skip common non-body containers via class hints
         cls = " ".join(p.get("class", [])).lower()
         if any(bad in cls for bad in ["promo","share","related","advert","cookie"]):
             continue
-        # Skip if inside non-body ancestors
         bad = False
         for anc in p.parents:
             if getattr(anc, "name", None) in ("figure","figcaption","aside","header","footer","nav"):
@@ -74,14 +78,13 @@ def clean_join(paras):
             acl = " ".join(anc.get("class", [])).lower() if hasattr(anc, "get") else ""
             if any(x in acl for x in ["promo","related","share","advert","cookie"]):
                 bad = True; break
-        if bad: 
+        if bad:
             continue
         out.append(txt)
     return "\n\n".join(out).strip()
 
 # ===================== EXTRACTION =====================
 def parse_article(url, category):
-    """Return article dict or None if extraction fails/thin."""
     try:
         html = fetch(url).text
     except Exception as e:
@@ -90,28 +93,22 @@ def parse_article(url, category):
 
     soup = BeautifulSoup(html, "lxml")
 
-    # Canonical & normalized URLs
     canonical = (soup.find("link", rel="canonical") or {}).get("href") or url
     canonical = normalize_url(canonical)
     norm_url  = normalize_url(url)
 
-    # Title
     h1 = soup.select_one("h1")
     title = h1.get_text(strip=True) if h1 else (soup.find("meta", property="og:title") or {}).get("content") or ""
 
-    # Author (BBC often omits)
     author_meta = soup.find("meta", attrs={"name": "byl"}) or soup.find("meta", attrs={"name": "author"})
     author = author_meta.get("content") if author_meta else None
 
-    # Image
     image = (soup.find("meta", property="og:image") or {}).get("content")
 
-    # Tags
     meta_kw = soup.find("meta", attrs={"name": "news_keywords"}) or soup.find("meta", attrs={"name": "keywords"})
     tags_list = [t.strip().lower() for t in (meta_kw.get("content","").split(",")) if t.strip()] if meta_kw else []
     tags = ", ".join(tags_list) if tags_list else None
 
-    # Published date
     date_raw = None
     for tag, attrs, attr in [
         ("meta", {"property": "article:published_time"}, "content"),
@@ -126,27 +123,20 @@ def parse_article(url, category):
     except Exception:
         published_date = None
 
-    # ----- Body extraction: Readability → BBC selectors → JSON-LD → AMP -----
     content_text = ""
-    # 1) Readability
     try:
         content_html = Document(html).summary(html_partial=True)
         content_text = BeautifulSoup(content_html, "lxml").get_text(" ", strip=True)
     except Exception:
         content_text = ""
 
-    # 2) BBC selectors
     if len(content_text) < 800:
-        paras = (soup.select('[data-component="text-block"] p') or
-                 soup.select("article p") or
-                 soup.select("main p") or
-                 soup.select('[class*="RichTextComponentWrapper"] p'))
+        paras = (soup.select("article p") or soup.select("main p") or soup.select("p"))
         if paras:
             txt = clean_join(paras)
             if len(txt) > len(content_text):
                 content_text = txt
 
-    # 3) JSON-LD articleBody
     if len(content_text) < 800:
         for s in soup.find_all("script", type="application/ld+json"):
             try:
@@ -162,7 +152,6 @@ def parse_article(url, category):
             if len(content_text) >= 800:
                 break
 
-    # 4) AMP fallback
     if len(content_text) < 800:
         amp = (soup.find("link", rel="amphtml") or {}).get("href")
         if amp:
@@ -176,17 +165,15 @@ def parse_article(url, category):
             except Exception:
                 pass
 
-    # Thin pages are skipped
     if len(content_text.strip()) < 200:
         return None
 
-    # ----- De-dup keys -----
-    # Prefer canonical URL; fallback to normalized request URL
     id_source = canonical or norm_url
     id_article = hashlib.sha1(id_source.encode()).hexdigest()[:12]
-
-    # Content hash catches same story under different URLs
     content_hash = hashlib.sha1((title + "|" + content_text[:4000]).encode("utf-8", "ignore")).hexdigest()
+
+    # ✅ Dynamic source name
+    source_name = extract_source_name(canonical or norm_url)
 
     return {
         "id_article": id_article,
@@ -195,14 +182,14 @@ def parse_article(url, category):
         "content": content_text.strip(),
         "url": canonical or norm_url,
         "category": category,
-        "source": "Washington Post",  # fixed label
+        "source": source_name,
         "author": author,
         "image": image,
         "published_date": published_date,
         "content_hash": content_hash
     }
 
-# ===================== DEDUPE STORAGE =====================
+# ===================== STORAGE =====================
 def ensure_csv(path):
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         pd.DataFrame(columns=[
@@ -216,7 +203,6 @@ def load_existing_keys(path):
         df = pd.read_csv(path, usecols=["id_article","content_hash"])
         return set(df["id_article"].astype(str)), set(df["content_hash"].astype(str))
     except Exception:
-        # fallback if older file lacks content_hash
         try:
             df = pd.read_csv(path, usecols=["id_article"])
             return set(df["id_article"].astype(str)), set()
@@ -238,7 +224,6 @@ def main():
             link = e.get("link")
             if not link:
                 continue
-            # Normalize RSS link early to reduce duplicates before fetch
             link = normalize_url(link)
             try:
                 row = parse_article(link, category)
@@ -248,7 +233,6 @@ def main():
                     continue
                 if (row["content_hash"] in seen_content) or (row["content_hash"] in seen_run_content):
                     continue
-
                 new_rows.append(row)
                 seen_run_ids.add(row["id_article"])
                 seen_run_content.add(row["content_hash"])
