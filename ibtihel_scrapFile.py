@@ -7,18 +7,17 @@ from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
 
 # ===================== CONFIG =====================
 FEEDS = {
-    "Politics": "https://feeds.npr.org/1014/rss.xml",
-    "World": "https://www.reuters.com/rssFeed/worldNews",               
-    "Business": "https://www.cnbc.com/id/10001147/device/rss",
-    "Technology": "https://www.engadget.com/rss.xml",                   
-    "Science": "https://www.sciencemag.org/rss/news_current.xml",
-    "Health": "https://www.statnews.com/feed/",
-    "Sport": "https://www.espn.com/espn/rss/news",
-    "Entertainment": "https://www.rollingstone.com/culture/feed/",
-    "Culture": "https://www.france24.com/en/culture/rss",               
-    "Society": "https://www.npr.org/rss/rss.php?id=1128"
+    "Politics": "https://feeds.npr.org/1014/rss.xml",                     
+    "World": "https://www.reuters.com/rssFeed/worldNews",                 
+    "Business": "https://www.cnbc.com/id/10001147/device/rss",            
+    "Technology": "https://www.engadget.com/rss.xml",                     
+    "Science": "https://www.sciencemag.org/rss/news_current.xml",         
+    "Health": "https://www.statnews.com/feed/",                          
+    "Sport": "https://www.espn.com/espn/rss/news",                        
+    "Entertainment": "https://www.rollingstone.com/culture/feed/",        
+    "Culture": "https://feeds.npr.org/1008/rss.xml",                      
+    "Society": "https://www.npr.org/rss/rss.php?id=1128"  
 }
-
 MAX_PER_FEED   = 60
 PAUSE_SECONDS  = 1.2
 TIMEOUT        = 20
@@ -54,13 +53,10 @@ def fetch(url, timeout=TIMEOUT):
     return r
 
 def extract_source_name(url: str) -> str:
-    """Extract a readable source name from the URL domain."""
-    domain = urlparse(url).netloc.lower()
-    domain = domain.replace("www.", "")
-    parts = domain.split(".")
-    if len(parts) > 2:
-        domain = ".".join(parts[-2:])
-    return domain.split(".")[0].capitalize()
+    """Extract readable source name from URL domain."""
+    domain = urlparse(url).netloc.lower().replace("www.", "")
+    base = domain.split(".")[0].capitalize()
+    return base
 
 def clean_join(paras):
     out = []
@@ -189,7 +185,7 @@ def parse_article(url, category):
         "content_hash": content_hash
     }
 
-# ===================== STORAGE =====================
+# ===================== DEDUPE STORAGE =====================
 def ensure_csv(path):
     if not os.path.exists(path) or os.path.getsize(path) == 0:
         pd.DataFrame(columns=[
